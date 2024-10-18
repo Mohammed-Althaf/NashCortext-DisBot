@@ -12,6 +12,9 @@ intents: Intents = Intents.default()
 intents.message_content = True
 client: Client = Client(intents=intents)
 
+# List of allowed channel IDs where the bot is allowed to respond
+ALLOWED_CHANNELS = [123456789012345678, 987654321098765432]  # Replace with actual channel IDs
+
 async def send_message(message: Message, user_message: str) -> None:
     if not user_message:
         print("Message was empty because Intents were not enabled properly")
@@ -32,22 +35,33 @@ async def send_message(message: Message, user_message: str) -> None:
 
 @client.event
 async def on_ready() -> None:
-    print(f'{client.user} is now running')  # Corrected 'client.User' to 'client.user'
+    print(f'{client.user} is now running')
 
 @client.event
 async def on_message(message: Message) -> None:
-    if message.author == client.user:  # Corrected 'client.User' to 'client.user'
+    if message.author == client.user:
         return
-    
-    username: str = str(message.author)
-    user_message: str = str(message.content)
-    channel: str = str(message.channel)
 
-    print(f"[{channel}] :: {username}: {user_message}")
-    await send_message(message=message, user_message=user_message)
+    # Check if the message is from a DM or a server
+    if message.guild is None:
+        # Handle DM
+        print(f"Received message in DM from {message.author}: {message.content}")
+        await send_message(message=message, user_message=message.content)
+    else:
+        # Handle server messages
+        if message.channel.id not in ALLOWED_CHANNELS:
+            print(f"Ignored message from unauthorized channel: {message.channel}")
+            return
+
+        username: str = str(message.author)
+        user_message: str = str(message.content)
+        channel: str = str(message.channel)
+
+        print(f"[{channel}] :: {username}: {user_message}")
+        await send_message(message=message, user_message=user_message)
 
 def main() -> None:
-    client.run(TOKEN)  # Corrected 'Client.run' to 'client.run'
+    client.run(TOKEN)
 
 if __name__ == '__main__':
     main()
