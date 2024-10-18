@@ -1,4 +1,5 @@
 import random 
+from Knowledge_base import knowledge_base
 
 def get_response(user_message: str) -> str:
     user_message = user_message.lower()
@@ -31,5 +32,16 @@ def get_response(user_message: str) -> str:
             "The only way to do great work is to love what you do. 💼"
         ]
         return random.choice(Quotes)
+    
+    elif "/access knowledge base" in user_message:
+        response = "Here is what I found:\n"
+        for key, value in knowledge_base.items():
+            if key in user_message:
+                response += f"{key}: {value}\n"
+        if response == "Here is what I found:\n":
+            response = "No matching knowledge found."
+        return response
+
+    
     else:
         return "Sorry, I don't understand that. Can you try asking something else? 🤔"
